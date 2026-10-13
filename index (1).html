@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alpha Cruise — Share your trip</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --mist:#FFFFFF; --paper:#FFFFFF; --ink:#1F1A2B; --soft:#6B6478; --line:#E9E4F1;
+  --teal:#5B2D90; --teal-ink:#FFFFFF; --brass:#F5B82E; --chip:#F8F6FB; --err:#B3261E;
+  --band:#FFFFFF; --band-ink:#1F1A2B; --star:#F0A818; --tint:#F6F1FC;
+  --serif:"Young Serif", Georgia, "Times New Roman", serif;
+  --sans:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--mist);color:var(--ink);font:400 16px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px 64px}
+.band{background:#fff;color:var(--ink);border-bottom:1px solid var(--line)}
+.band .inner{max-width:640px;margin:0 auto;padding:26px 18px 30px}
+header h1{font:400 clamp(30px,7vw,42px)/1.1 var(--serif);margin:22px 0 10px;color:var(--ink);letter-spacing:-.01em}
+header p{margin:0;color:var(--soft);max-width:52ch}
+.brand{display:block}
+.brand img{display:block;height:auto;width:min(230px,62vw)}
+.tabs button[aria-selected="true"]{background:var(--teal)!important;color:#fff!important;border-color:var(--teal)!important}
+.wake{height:6px;background:var(--line);border-radius:3px;margin:24px 0 6px;overflow:hidden}
+.wake i{display:block;height:100%;width:0;background:var(--brass);transition:width .35s ease}
+.wake-note{font-size:13px;color:var(--soft)}
+.tabs{display:flex;gap:6px;margin:20px 0 0}
+.tabs button{font:500 14px var(--sans);border:1px solid var(--line);background:transparent;color:var(--soft);padding:7px 14px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--mist);border-color:var(--ink)}
+section.part{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 0 var(--line);padding:22px 20px;margin-top:18px}
+section.part{border-top:3px solid var(--teal)}
+section.part h2{font:400 22px/1.25 var(--serif);margin:0 0 4px;color:var(--teal)}
+section.part > p.lead{margin:0 0 6px;color:var(--soft);font-size:15px}
+.q{margin-top:20px}
+.q label.t, .q .t{display:block;font-weight:600;font-size:15px;margin-bottom:8px}
+.q .hint{font-weight:400;color:var(--soft);font-size:13px}
+input[type=text],input[type=month],select,textarea{width:100%;font:400 16px var(--sans);color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+textarea{min-height:92px;resize:vertical;line-height:1.5}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,.opt input:focus-visible+span{outline:2px solid var(--brass);outline-offset:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.row2{grid-template-columns:1fr}}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt span{display:inline-block;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--chip);font-size:15px;cursor:pointer;user-select:none}
+.opt input:checked+span{background:var(--teal);border-color:var(--teal);color:var(--teal-ink)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.scale .opt span{display:block;text-align:center;border-radius:10px;padding:10px 0;font-weight:600}
+.scale-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-top:5px}
+.nps{grid-template-columns:repeat(11,1fr);gap:4px}
+.nps .opt span{padding:9px 0;font-size:14px}
+@media (max-width:420px){.nps{grid-template-columns:repeat(6,1fr)}}
+.actions{margin-top:22px;display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.btn{font:600 16px var(--sans);border:0;border-radius:12px;padding:14px 18px;cursor:pointer;background:var(--teal);color:var(--teal-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.55;cursor:default}
+.err{color:var(--err);font-size:14px;min-height:1em}
+/* the postcard */
+.card{margin-top:22px;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.card .stamp{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px dashed var(--line)}
+.card .stamp b{font:400 19px/1.2 var(--serif)}
+.card .stamp small{display:block;color:var(--soft);font-size:13px;margin-top:2px}
+.stars{color:var(--star);font-size:20px;letter-spacing:2px;white-space:nowrap}
+.card blockquote{margin:0;padding:18px 20px 20px;font:400 18px/1.6 var(--serif)}
+.card .foot{padding:0 20px 18px;color:var(--soft);font-size:13px}
+.card .tools{display:flex;gap:8px;padding:0 20px 20px;flex-wrap:wrap}
+.card .tools .btn{padding:10px 14px;font-size:14px;text-decoration:none;display:inline-block}
+.status{font-size:14px;color:var(--soft);margin-top:10px}
+/* thank you */
+.thanks{margin-top:24px;background:var(--tint);color:var(--ink);border-radius:16px;padding:26px 22px;border-left:5px solid var(--teal)}
+.thanks h2{font:400 clamp(26px,6vw,34px)/1.15 var(--serif);margin:0 0 10px;color:var(--teal)}
+.thanks p{margin:0 0 10px;color:var(--ink);max-width:56ch}
+.thanks p:last-child{margin:0}
+.thanks .sign{color:var(--teal);font-weight:600}
+.small-h{font:400 18px var(--serif);margin:26px 0 0}
+/* reviews list */
+.list .card blockquote{font-size:16px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.summary div{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
+.summary b{display:block;font:400 26px/1.1 var(--serif)}
+.summary span{font-size:13px;color:var(--soft)}
+details.raw{padding:0 20px 18px;font-size:14px;color:var(--soft)}
+details.raw summary{cursor:pointer;color:var(--ink);font-weight:500}
+details.raw dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:10px 0 0}
+details.raw dt{color:var(--soft)} details.raw dd{margin:0;color:var(--ink)}
+.empty{color:var(--soft);margin-top:18px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="band"><div class="inner">
+    <div class="brand"><img src="data:image/png;base64,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" alt="Alpha Cruise" width="420" height="75"></div>
+    <h1>How was your trip with us?</h1>
+    <p>Takes about three minutes. Tell us how our team looked after you and how the trip itself went, and we'll turn your answers into a short review.</p>
+</div></header>
+<div class="wrap">
+
+  <main id="formView">
+    <div class="wake" aria-hidden="true"><i id="wake"></i></div>
+    <div class="wake-note" id="wakeNote">0 of 11 questions answered</div>
+
+    <form id="f" novalidate>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+      <section class="part">
+        <h2>Your trip</h2>
+        <p class="lead">So we know which voyage you're telling us about.</p>
+        <div class="q"><label class="t" for="name">Your name <span class="hint">(optional, shown with your review)</span></label>
+          <input type="text" id="name" name="name" autocomplete="name" placeholder="e.g. Grace A."></div>
+        <div class="q row2">
+          <div><label class="t" for="dest">Where did you go?</label>
+            <input type="text" id="dest" name="dest" placeholder="e.g. Mediterranean cruise" required></div>
+          <div><label class="t" for="when">When?</label>
+            <input type="month" id="when" name="when"></div>
+        </div>
+        <div class="q"><span class="t">Who did you travel with?</span>
+          <div class="opts" data-name="party">
+            <label class="opt"><input type="radio" name="party" value="Solo"><span>Solo</span></label>
+            <label class="opt"><input type="radio" name="party" value="Partner"><span>Partner</span></label>
+            <label class="opt"><input type="radio" name="party" value="Family"><span>Family</span></label>
+            <label class="opt"><input type="radio" name="party" value="Friends"><span>Friends</span></label>
+            <label class="opt"><input type="radio" name="party" value="Group / work"><span>Group / work</span></label>
+          </div></div>
+      </section>
+
+      <section class="part">
+        <h2>Guidance from our team</h2>
+        <p class="lead">From your first enquiry through to the end of the trip.</p>
+        <div class="q"><span class="t">How helpful was your Alpha Cruise representative?</span>
+          <div class="scale" data-name="repRating"></div>
+          <div class="scale-ends"><span>Not helpful</span><span>Outstanding</span></div></div>
+        <div class="q"><span class="t">How quickly did we get back to you?</span>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="response" value="Very quickly"><span>Very quickly</span></label>
+            <label class="opt"><input type="radio" name="response" value="Reasonably quickly"><span>Reasonably quickly</span></label>
+            <label class="opt"><input type="radio" name="response" value="Too slowly"><span>Too slowly</span></label>
+          </div></div>
+        <div class="q"><span class="t">Did you feel prepared before you left? <span class="hint">(documents, what to pack, schedules)</span></span>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="prepared" value="Fully prepared"><span>Fully</span></label>
+            <label class="opt"><input type="radio" name="prepared" value="Mostly prepared"><span>Mostly</span></label>
+            <label class="opt"><input type="radio" name="prepared" value="Not well prepared"><span>Not really</span></label>
+          </div></div>
+        <div class="q"><label class="t" for="repNotes">What did our team do well, or what could they have done better?</label>
+          <textarea id="repNotes" name="repNotes" placeholder="Anyone you'd like to mention by name?"></textarea></div>
+      </section>
+
+      <section class="part">
+        <h2>The trip itself</h2>
+        <p class="lead">The ship, the stops, the whole experience.</p>
+        <div class="q"><span class="t">Overall, how would you rate the trip?</span>
+          <div class="scale" data-name="tripRating"></div>
+          <div class="scale-ends"><span>Poor</span><span>Unforgettable</span></div></div>
+        <div class="q"><span class="t">Accommodation and onboard comfort</span>
+          <div class="scale" data-name="comfort"></div>
+          <div class="scale-ends"><span>Poor</span><span>Excellent</span></div></div>
+        <div class="q"><span class="t">How was the pace of the itinerary?</span>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="pace" value="Too relaxed"><span>Too relaxed</span></label>
+            <label class="opt"><input type="radio" name="pace" value="Just right"><span>Just right</span></label>
+            <label class="opt"><input type="radio" name="pace" value="Too packed"><span>Too packed</span></label>
+          </div></div>
+        <div class="q"><span class="t">Was it good value for money?</span>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="value" value="Great value"><span>Great value</span></label>
+            <label class="opt"><input type="radio" name="value" value="Fair value"><span>Fair</span></label>
+            <label class="opt"><input type="radio" name="value" value="Poor value"><span>Poor value</span></label>
+          </div></div>
+        <div class="q"><label class="t" for="highlight">What was the highlight of your trip?</label>
+          <textarea id="highlight" name="highlight" placeholder="A place, a meal, a moment…"></textarea></div>
+        <div class="q"><label class="t" for="improve">Anything that didn't go to plan, or that we should change?</label>
+          <textarea id="improve" name="improve"></textarea></div>
+      </section>
+
+      <section class="part">
+        <h2>Last one</h2>
+        <div class="q"><span class="t">How likely are you to recommend Alpha Cruise to a friend?</span>
+          <div class="scale nps" data-name="nps" data-from="0" data-to="10"></div>
+          <div class="scale-ends"><span>Not likely</span><span>Very likely</span></div></div>
+      </section>
+
+      <div class="actions">
+        <div class="err" id="err" role="alert"></div>
+        <button class="btn" type="submit" id="go">Write my review</button>
+      </div>
+    </form>
+
+    <div id="result" hidden>
+      <div class="thanks" id="thanks">
+        <h2 id="thanksTitle">Thank you so much!</h2>
+        <p>Thank you for travelling with Alpha Cruise and for taking the time to share your experience. Every word helps us look after you, and the travellers who come after you, even better.</p>
+        <p>We'll keep you posted on upcoming voyages, special offers and travel tips, and our team is always here whenever you're ready to plan your next adventure.</p>
+        <p class="sign">We can't wait to welcome you aboard again. — The Alpha Cruise team</p>
+      </div>
+      <h3 class="small-h">Your review</h3>
+      <div class="card" id="resultCard"></div>
+      <div class="status" id="saveStatus" role="status"></div>
+      <div class="actions"><button class="btn ghost" type="button" id="again">Start a new review</button></div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ===== Put your details here =====
+var ALPHA_EMAIL = 'hello@alphacruisetravels.com';
+var ALPHA_WHATSAPP = '';   // e.g. '2348012345678' (country code, no + or spaces)
+// ==================================
+(function(){
+  document.querySelectorAll('.scale').forEach(function(el){
+    var name=el.dataset.name, from=+(el.dataset.from||1), to=+(el.dataset.to||5);
+    for(var i=from;i<=to;i++){
+      var l=document.createElement('label'); l.className='opt';
+      l.innerHTML='<input type="radio" name="'+name+'" value="'+i+'" aria-label="'+i+' out of '+to+'"><span>'+i+'</span>';
+      el.appendChild(l);
+    }
+  });
+
+  var form=document.getElementById('f');
+  var tracked=['dest','party','repRating','response','prepared','repNotes','tripRating','comfort','pace','value','highlight'];
+  function val(n){var e=form.elements[n]; if(!e) return ''; return (e.value||'').trim();}
+  function progress(){
+    var done=tracked.filter(function(n){return val(n)!==''}).length;
+    document.getElementById('wake').style.width=(done/tracked.length*100)+'%';
+    document.getElementById('wakeNote').textContent=done+' of '+tracked.length+' questions answered';
+  }
+  form.addEventListener('input',progress); form.addEventListener('change',progress);
+
+  function stars(n){n=+n||0; return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n);}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function monthLabel(m){ if(!m) return ''; var p=m.split('-'); var d=new Date(+p[0],+p[1]-1,1); return isNaN(d)?m:d.toLocaleDateString(undefined,{month:'long',year:'numeric'}); }
+
+  // Backup writer, used if the AI writer is unavailable
+  function composeLocally(a){
+    var out=[], trip=a.dest||'our trip', tr=+a.tripRating||0;
+    var opener= tr>=5?'An unforgettable '+trip:tr>=4?'A really enjoyable '+trip:tr>=3?'A decent '+trip:'A disappointing '+trip;
+    out.push(opener+(a.party?' travelling '+(a.party==='Solo'?'solo':'with '+a.party.toLowerCase()):'')+(a.when?' in '+monthLabel(a.when):'')+'.');
+    var rr=+a.repRating||0;
+    var team= rr>=4?'The Alpha Cruise team was genuinely helpful':rr>=3?'The Alpha Cruise team was helpful enough':'Guidance from the Alpha Cruise team fell short';
+    var bits=[]; if(a.response) bits.push('replied '+a.response.toLowerCase()); if(a.prepared) bits.push('left me '+a.prepared.toLowerCase().replace(' prepared','')+' prepared');
+    out.push(team+(bits.length?', '+bits.join(' and '):'')+'.');
+    if(a.highlight) out.push('Highlight: '+a.highlight.replace(/\s+/g,' ').replace(/[.\s]+$/,'')+'.');
+    var dets=[]; if(a.pace) dets.push('the pace was '+a.pace.toLowerCase()); if(a.value) dets.push('it felt like '+a.value.toLowerCase()); if(a.comfort) dets.push('comfort rated '+a.comfort+'/5');
+    if(dets.length) out.push(dets.join(', ').replace(/^./,function(c){return c.toUpperCase()})+'.');
+    if(a.improve) out.push('One thing to improve: '+a.improve.replace(/\s+/g,' ').replace(/[.\s]+$/,'')+'.');
+    else if(a.nps!=='') out.push(+a.nps>=9?'I would happily recommend Alpha Cruise.':+a.nps>=7?'I would likely recommend Alpha Cruise.':'I am unsure I would recommend Alpha Cruise yet.');
+    return out.slice(0,5).join(' ');
+  }
+
+  function answers(){
+    var a={}; ['name','dest','when','party','repRating','response','prepared','repNotes','tripRating','comfort','pace','value','highlight','improve','nps','website'].forEach(function(n){a[n]=val(n)});
+    return a;
+  }
+
+  function cardHTML(a,text){
+    var who=a.name?esc(a.name):'An Alpha Cruise traveller';
+    var meta=[esc(a.dest),esc(monthLabel(a.when)),a.party?esc(a.party):''].filter(Boolean).join(', ');
+    return '<div class="stamp"><div><b>'+who+'</b><small>'+meta+'</small></div><div class="stars" aria-label="'+(+a.tripRating)+' out of 5">'+stars(a.tripRating)+'</div></div>'+
+      '<blockquote>'+esc(text)+'</blockquote>';
+  }
+
+  function showResult(a,text){
+    form.hidden=true;
+    var first=(a.name||'').split(/\s+/)[0];
+    document.getElementById('thanksTitle').textContent=first?('Thank you so much, '+first+'!'):'Thank you so much!';
+    document.querySelector('.wake').hidden=true; document.getElementById('wakeNote').hidden=true;
+    document.getElementById('result').hidden=false;
+    var c=document.getElementById('resultCard');
+    c.innerHTML=cardHTML(a,text)+'<div class="tools"><button class="btn ghost" type="button" id="copy">Copy review</button></div>';
+    document.getElementById('copy').onclick=function(){
+      var t=c.querySelector('blockquote').textContent, b=this;
+      (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='Copied'}).catch(function(){b.textContent='Select the text to copy'});
+    };
+    document.getElementById('saveStatus').textContent='';
+    document.getElementById('thanks').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+
+  function fullText(a,review){
+    var L=['NEW ALPHA CRUISE REVIEW','',review,'','--- Answers ---',
+      'Name: '+(a.name||'-'),'Trip: '+a.dest+(a.when?' ('+monthLabel(a.when)+')':''),'Travelled with: '+(a.party||'-'),
+      'Team rating: '+a.repRating+'/5','Response speed: '+(a.response||'-'),'Prepared: '+(a.prepared||'-'),'About our team: '+(a.repNotes||'-'),
+      'Trip rating: '+a.tripRating+'/5','Comfort: '+(a.comfort?a.comfort+'/5':'-'),'Pace: '+(a.pace||'-'),'Value: '+(a.value||'-'),
+      'Highlight: '+(a.highlight||'-'),'To improve: '+(a.improve||'-'),'Recommend: '+(a.nps!==''?a.nps+'/10':'-')];
+    return L.join('\n');
+  }
+  function mailtoButton(a,review){
+    var tools=document.querySelector('#resultCard .tools');
+    var m=document.createElement('a'); m.className='btn'; m.textContent='Send by email';
+    m.href='mailto:'+ALPHA_EMAIL+'?subject='+encodeURIComponent('My Alpha Cruise review – '+a.dest)+'&body='+encodeURIComponent(fullText(a,review));
+    tools.insertBefore(m,tools.firstChild);
+    if(ALPHA_WHATSAPP){
+      var w=document.createElement('a'); w.className='btn'; w.textContent='Send on WhatsApp';
+      w.href='https://wa.me/'+ALPHA_WHATSAPP.replace(/\D/g,'')+'?text='+encodeURIComponent(fullText(a,review)); w.target='_blank'; w.rel='noopener';
+      tools.insertBefore(w,tools.firstChild);
+    }
+  }
+  // Sends every review straight to the Alpha Cruise inbox
+  function addSendButtons(a,review){
+    var st=document.getElementById('saveStatus');
+    st.textContent='Sending your review to Alpha Cruise…';
+    var payload={
+      _subject:'New review: '+(a.name||'A traveller')+' – '+a.dest+' ('+a.tripRating+'/5)',
+      _template:'table', _captcha:'false', _honey:a.website||'',
+      'Written review':review,
+      'Name':a.name||'-', 'Trip':a.dest, 'When':a.when?monthLabel(a.when):'-', 'Travelled with':a.party||'-',
+      'Team rating (1-5)':a.repRating, 'Response speed':a.response||'-', 'Felt prepared':a.prepared||'-', 'About our team':a.repNotes||'-',
+      'Trip rating (1-5)':a.tripRating, 'Comfort (1-5)':a.comfort||'-', 'Pace':a.pace||'-', 'Value for money':a.value||'-',
+      'Highlight':a.highlight||'-', 'To improve':a.improve||'-', 'Recommend (0-10)':a.nps!==''?a.nps:'-'
+    };
+    fetch('https://formsubmit.co/ajax/'+ALPHA_EMAIL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        if(d && (d.success===true||d.success==='true')){ st.textContent='Your review has been sent to Alpha Cruise. Thank you!'; }
+        else { throw new Error('not sent'); }
+      })
+      .catch(function(){
+        st.textContent='We couldn’t send this automatically. Please tap “Send by email” so it reaches us.';
+        mailtoButton(a,review);
+      });
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var a=answers(), err=document.getElementById('err');
+    if(!a.dest||!a.repRating||!a.tripRating){
+      err.textContent='Please add where you went and both star ratings (our team, and the trip overall).'; return;
+    }
+    err.textContent='';
+    var go=document.getElementById('go'); go.disabled=true; go.textContent='Writing your review…';
+    var review=composeLocally(a);
+    showResult(a,review);
+    addSendButtons(a,review);
+    go.disabled=false; go.textContent='Write my review';
+  });
+
+  document.getElementById('again').onclick=function(){
+    form.reset(); form.hidden=false; progress();
+    document.querySelector('.wake').hidden=false; document.getElementById('wakeNote').hidden=false;
+    document.getElementById('result').hidden=true; window.scrollTo(0,0);
+  };
+  progress();
+})();
+</script>
+</body>
+</html>
